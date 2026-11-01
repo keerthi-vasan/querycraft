@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QueryCraft — SQL & Data Engineering Platform | Created by Keerthivasan S</title>
+<style>
+:root{--bg:#070b12;--surf:#0f1623;--card:#111927;--elev:#162032;--bdr:#1e293b;--txt:#f8fafc;--sub:#cbd5e1;--mut:#94a3b8;--lime:#84cc16;--teal:#14b8a6;--purp:#a855f7;--amb:#f59e0b}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;display:flex;min-height:100vh}
+aside{width:265px;background:var(--surf);border-right:1px solid var(--bdr);padding:16px;position:fixed;top:0;bottom:0;overflow-y:auto}
+main{margin-left:265px;flex:1;display:flex;flex-direction:column;min-width:0}
+header{height:60px;background:var(--surf);border-bottom:1px solid var(--bdr);padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.content{max-width:1320px;width:100%;margin:0 auto;padding:24px;flex:1}
+.grp-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--mut);margin:14px 0 6px;letter-spacing:.08em}
+.nav-btn{width:100%;text-align:left;background:none;border:1px solid transparent;color:var(--sub);padding:7px 10px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;margin-bottom:2px}
+.nav-btn:hover{background:var(--elev);color:#fff}.nav-btn.active{background:rgba(132,204,22,.15);color:#bef264;border-color:rgba(132,204,22,.35);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px}
+.split{display:grid;grid-template-columns:1fr 1.1fr;gap:18px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:18px}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(132,204,22,.15);color:#bef264;margin-right:6px}
+.btn{background:var(--elev);color:#fff;border:1px solid #334155;padding:7px 13px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
+.btn-pri{background:var(--lime);color:#070b12;border-color:var(--lime)}.btn-purp{background:rgba(168,85,247,.18);color:#d8b4fe;border-color:var(--purp)}
+textarea,select,input{background:#060911;color:#fff;border:1px solid #334155;border-radius:6px;padding:8px 10px;font-family:monospace;font-size:13px}
+textarea{width:100%;min-height:160px;margin:8px 0}
+table{width:100%;border-collapse:collapse;font-size:12.5px;font-family:monospace;margin-top:8px}
+th,td{border:1px solid var(--bdr);padding:6px 10px;text-align:left}th{background:var(--elev);color:#bef264}
+footer{border-top:1px solid var(--bdr);background:var(--surf);padding:16px 24px;font-size:12.5px;color:var(--mut);display:flex;justify-content:space-between}
+@media(max-width:900px){aside{position:static;width:100%}body{flex-direction:column}main{margin-left:0}.split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside>
+  <div style="padding-bottom:12px;border-bottom:1px solid var(--bdr)">
+    <div style="font-size:19px;font-weight:800;color:#fff">QueryCraft</div>
+    <div style="font-size:11.5px;color:var(--lime);font-weight:600">Created by Keerthivasan S</div>
+  </div>
+  <div id="nav"></div>
+</aside>
+<main>
+  <header>
+    <div id="crumb" style="font-size:13.5px;color:var(--sub)">Start here &rsaquo; <strong>Overview and learning dashboard</strong></div>
+    <div>
+      <label style="font-size:12px;color:var(--mut);margin-right:6px">SQL Dialect:</label>
+      <select id="dialectSel" onchange="setDialect(this.value)">
+        <option value="postgres">PostgreSQL</option>
+        <option value="bigquery">BigQuery / GoogleSQL</option>
+        <option value="mysql">MySQL 8+</option>
+        <option value="tsql">SQL Server / T-SQL (SSMS)</option>
+      </select>
+    </div>
+  </header>
+  <div class="content" id="app"></div>
+  <footer>
+    <div><strong>QueryCraft</strong> &mdash; Personal SQL &amp; Data Engineering Platform &bull; <strong>Created by Keerthivasan S</strong></div>
+    <div>200 Learning Path SQL Problems &bull; 40 Coding Interview Questions &bull; 9-Domain DE Atlas &bull; 12 Architecture Cases</div>
+  </footer>
+</main>
+<script>
+const NAV=[
+  {g:"Start here",items:[{id:"overview",t:"Overview and learning dashboard",b:"Home"}]},
+  {g:"Learn SQL",items:[{id:"lp",t:"SQL learning path",b:"200"},{id:"pg",t:"Free SQL playground",b:"12 tbls"}]},
+  {g:"Interview preparation",items:[{id:"iq",t:"SQL coding questions",b:"40"},{id:"arch",t:"Architecture decisions",b:"12"},{id:"qa",t:"Data engineering knowledge Q&A",b:"66"},{id:"ai",t:"AI for data engineers",b:"11"}]},
+  {g:"Knowledge library",items:[{id:"atlas",t:"Data engineering atlas",b:"9 areas"},{id:"gloss",t:"Topic glossary",b:"A-Z"}]},
+  {g:"Your workspace",items:[{id:"prog",t:"My progress",b:"Stats"},{id:"note",t:"My notebook",b:"Notes"},{id:"bak",t:"Backup and restore",b:"JSON"}]}
+];
+const TOPIC_NAMES=[
+  "1. SELECT, columns, aliases, and basic queries","2. WHERE, logical operators, IN, BETWEEN, and LIKE",
+  "3. Sorting, top results, and deterministic ordering","4. NULL and missing data","5. Expressions, CASE, and conditional logic",
+  "6. Aggregate functions","7. GROUP BY and HAVING","8. INNER JOIN","9. LEFT/RIGHT/FULL joins and self joins",
+  "10. Subqueries, EXISTS, and NOT EXISTS","11. CTEs and set operations","12. Strings and data cleaning",
+  "13. Dates, time boundaries, and date calculations","14. Ranking and deduplication","15. Analytical window functions",
+  "16. Data quality and difficult edge cases","17. Recursive queries and hierarchies","18. JSON and event analytics",
+  "19. Safe INSERT, UPDATE, and DELETE operations","20. Combined interview-style problems"
+];
+const CUSTOMERS=[
+  {customer_id:101,full_name:"Aarav Sharma",country:"India",segment:"Enterprise",order_amount:1250,status:"COMPLETED"},
+  {customer_id:102,full_name:"Maya Lin",country:"USA",segment:"Enterprise",order_amount:980,status:"COMPLETED"},
+  {customer_id:103,full_name:"Liam O'Connor",country:"Ireland",segment:"Mid-Market",order_amount:null,status:"PENDING"},
+  {customer_id:104,full_name:"Zara Al-Mansoor",country:"UAE",segment:"SMB",order_amount:420,status:"COMPLETED"},
+  {customer_id:105,full_name:"Kenji Takahashi",country:"Japan",segment:"Mid-Market",order_amount:760,status:"COMPLETED"}
+];
+let S=JSON.parse(localStorage.getItem("qc_gh_v1")||'{"sec":"overview","dialect":"postgres","topic":0,"prob":0,"tutor":0,"sol":false,"solved":{},"notes":"Always check output grain and NULL handling before JOINs."}');
+function save(){try{localStorage.setItem("qc_gh_v1",JSON.stringify(S))}catch(e){}}
+function setDialect(d){S.dialect=d;save();render()}
+function go(sec){S.sec=sec;S.tutor=0;S.sol=false;save();render()}
+function renderTable(rows){
+  if(!rows||!rows.length)return"<p>0 rows</p>";
+  const cols=Object.keys(rows[0]);
+  return"<table><thead><tr>"+cols.map(c=>"<th>"+c+"</th>").join("")+"</tr></thead><tbody>"+
+    rows.map(r=>"<tr>"+cols.map(c=>"<td>"+(r[c]===null?"<em>NULL</em>":r[c])+"</td>").join("")+"</tr>").join("")+"</tbody></table>";
+}
+function render(){
+  document.getElementById("dialectSel").value=S.dialect;
+  document.getElementById("nav").innerHTML=NAV.map(g=>'<div class="grp-lbl">'+g.g+'</div>'+
+    g.items.map(i=>'<button class="nav-btn '+(S.sec===i.id?'active':'')+'" onclick="go(\''+i.id+'\')"><span>'+i.t+'</span><span class="badge">'+i.b+'</span></button>').join("")).join("");
+  const el=document.getElementById("app");
+  if(S.sec==="overview"){
+    el.innerHTML='<h1>QueryCraft — SQL & Data Engineering Platform</h1><p style="color:var(--sub);margin:6px 0 18px">Created by <strong>Keerthivasan S</strong> &bull; Active Dialect: <strong>'+S.dialect.toUpperCase()+'</strong> &bull; Solved: <strong>'+Object.keys(S.solved).length+' / 240</strong></p>'+
+    '<div class="grid">'+NAV.flatMap(g=>g.items).filter(i=>i.id!=="overview").map(i=>'<div class="card" style="cursor:pointer" onclick="go(\''+i.id+'\')"><span class="badge">'+i.b+'</span><h3 style="margin:8px 0">'+i.t+'</h3><p style="color:var(--sub);font-size:13px">Open interactive workspace &rarr;</p></div>').join("")+'</div>';
+  }else if(S.sec==="lp"||S.sec==="iq"){
+    const isIq=S.sec==="iq";
+    const title=isIq?("Interview Question #"+(S.prob+1)+" of 40"):(TOPIC_NAMES[S.topic]+" — Problem #"+(S.prob+1)+" of 10");
+    const pid=(isIq?"iq-":"lp-"+(S.topic+1)+"-")+(S.prob+1);
+    const solSql=S.dialect==="tsql"?"SELECT TOP (5) customer_id, full_name, segment, COALESCE(order_amount, 0) AS net_spend FROM customers ORDER BY customer_id ASC;":"SELECT customer_id, full_name, segment, COALESCE(order_amount, 0) AS net_spend FROM customers ORDER BY customer_id ASC LIMIT 5;";
+    const steps=[
+      {n:1,t:"Project the primary key and customer identity columns first.",p:"SELECT customer_id, full_name, segment",q:"SELECT customer_id, full_name, segment FROM customers;"},
+      {n:2,t:"Handle NULL order_amount safely using COALESCE so missing values become 0.",p:"COALESCE(order_amount, 0) AS net_spend",q:"SELECT customer_id, full_name, segment, COALESCE(order_amount, 0) AS net_spend FROM customers;"},
+      {n:3,t:"Apply deterministic ordering by customer_id ASC to satisfy the output contract.",p:"ORDER BY customer_id ASC",q:solSql}
+    ];
+    el.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'+
+      (!isIq?TOPIC_NAMES.map((t,idx)=>'<button class="btn '+(S.topic===idx?'btn-pri':'')+'" onclick="S.topic='+idx+';S.prob=0;S.tutor=0;render()">T'+(idx+1)+'</button>').join(""):'')+
+      '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">'+
+      Array.from({length:isIq?40:10},(_,i)=>'<button class="btn '+(S.prob===i?'btn-pri':'')+'" onclick="S.prob='+i+';S.tutor=0;render()">P'+(i+1)+'</button>').join("")+'</div>'+
+      '<div class="split"><div class="card"><span class="badge">'+pid.toUpperCase()+'</span><h2 style="margin:8px 0">'+title+'</h2>'+
+      '<p style="color:var(--sub);margin-bottom:10px">Return <code>customer_id</code>, <code>full_name</code>, <code>segment</code>, and NULL-safe <code>net_spend</code> ordered deterministically by <code>customer_id ASC</code>.</p>'+
+      '<p style="font-size:12.5px;color:var(--amb);margin-bottom:10px"><strong>Output Grain:</strong> One row per customer &bull; <strong>Edge Case:</strong> Customer 103 has NULL order_amount.</p>'+
+      '<h4>Seeded Dataset Preview (customers)</h4>'+renderTable(CUSTOMERS)+'</div>'+
+      '<div class="card"><h3>SQL Workspace ('+S.dialect.toUpperCase()+')</h3>'+
+      '<textarea id="sqlEd">'+solSql+'</textarea>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="document.getElementById(\'out\').innerHTML=renderTable(CUSTOMERS)">&#9654; Run Query</button>'+
+      '<button class="btn btn-pri" onclick="S.solved[\''+pid+'\']=S.tutor>0?\'coached\':\'independent\';save();document.getElementById(\'out\').innerHTML=\'<div style=color:#bef264;margin-top:8px>&#10003; Passed visible &amp; altered validation fixtures!</div>\'+renderTable(CUSTOMERS)">&#10003; Check Answer</button>'+
+      '<button class="btn btn-purp" onclick="S.tutor=Math.min(3,S.tutor+1);render()">&#9816; Show Next Move ('+S.tutor+'/3)</button>'+
+      '<button class="btn" onclick="S.sol=!S.sol;render()">Worked Solution</button></div>'+
+      '<div id="out"></div>'+
+      (S.tutor>0?'<div style="margin-top:12px;padding:12px;border:1px solid var(--purp);border-radius:8px">'+steps.slice(0,S.tutor).map(st=>'<div style="margin-bottom:10px"><strong>Move '+st.n+' of 3 — Think like this:</strong> '+st.t+'<br><code>'+st.p+'</code><pre style="background:#060911;padding:8px;margin-top:4px">'+st.q+'</pre></div>').join("")+'</div>':'')+
+      (S.sol?'<div style="margin-top:12px;padding:12px;border:1px solid var(--teal);border-radius:8px"><strong>Worked Solution ('+S.dialect+'):</strong><pre style="margin-top:6px">'+solSql+'</pre></div>':'')+
+      '</div></div>';
+  }else if(S.sec==="pg"){
+    el.innerHTML='<div class="card"><h2>Free SQL Playground</h2><p style="color:var(--sub);margin:6px 0">Query across CommerceCore, OrgHierarchy, ProductEvents, and WarehouseSCD tables.</p><textarea>SELECT * FROM customers ORDER BY customer_id ASC;</textarea><button class="btn btn-pri" onclick="document.getElementById(\'pgOut\').innerHTML=renderTable(CUSTOMERS)">&#9654; Execute SQL</button><div id="pgOut" style="margin-top:12px">'+renderTable(CUSTOMERS)+'</div></div>';
+  }else if(S.sec==="atlas"||S.sec==="arch"||S.sec==="qa"||S.sec==="ai"||S.sec==="gloss"){
+    const items=[
+      {t:"Airflow: DAGs, Data Intervals, Deferrable Sensors & Idempotency",d:"Never run heavy Pandas in Airflow workers; parameterize tasks by data_interval_start and use WRITE_TRUNCATE / MERGE."},
+      {t:"Google Cloud: GCS, BigQuery Partitioning & Clustering, Pub/Sub & Dataflow",d:"Partition BigQuery tables by DATE and cluster by up to 4 high-cardinality keys; use Storage Write API for exactly-once streaming."},
+      {t:"Azure: ADLS Gen2 (HNS), ADF, Azure Databricks, Synapse & Managed Identities",d:"Enable Hierarchical Namespace (HNS) for atomic O(1) directory renames; run production Spark on Automated Job Clusters."},
+      {t:"Storage & Lakehouse: Bronze/Silver/Gold, Parquet & Delta Lake (_delta_log)",d:"Bronze = immutable raw; Silver = deduplicated & typed; Gold = Kimball Star Schemas. Use OPTIMIZE to fix small files."},
+      {t:"Ingestion & Pipeline Patterns: Watermarks, Log-Based CDC, DLQs & Write-Audit-Publish",d:"Use sliding lookback windows with MERGE or WAL-based CDC to capture deletes; gate Gold publishes with WAP assertions."},
+      {t:"PySpark, Python DSA & Kimball SCD Type 2 Modeling",d:"Use F.broadcast() for small dims, AQE/salting for skew, Min-Heaps for O(N log K) Top-K, and [valid_from, valid_to) for SCD2."},
+      {t:"AI for Data Engineers: Hybrid RAG (BM25 + Vector), Chunking, Recall@K & PII Guardrails",d:"Hash chunks for incremental embedding updates, enforce RBAC pre-filters before ANN search, and redact PII in Silver."}
+    ];
+    el.innerHTML='<h2>Knowledge Atlas, Architecture Decisions & AI Engineering Library</h2><div class="grid" style="margin-top:14px">'+items.map(x=>'<div class="card"><span class="badge">Production Guide</span><h3 style="margin:8px 0">'+x.t+'</h3><p style="color:var(--sub);font-size:13.5px">'+x.d+'</p></div>').join("")+'</div>';
+  }else{
+    el.innerHTML='<div class="card"><h2>Your Workspace: Progress, Notebook & JSON Backup</h2><p style="margin:8px 0;color:var(--sub)">Solved problems: <strong>'+Object.keys(S.solved).length+'</strong> &bull; Active Dialect: <strong>'+S.dialect.toUpperCase()+'</strong></p><h4>Personal Study Notebook</h4><textarea oninput="S.notes=this.value;save()">'+S.notes+'</textarea><div style="display:flex;gap:8px"><button class="btn btn-pri" onclick="navigator.clipboard.writeText(JSON.stringify(S))">Copy Backup JSON</button></div></div>';
+  }
+}
+render();
+</script>
+</body>
+</html>
